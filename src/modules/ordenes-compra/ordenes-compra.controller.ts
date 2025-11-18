@@ -11,7 +11,7 @@ export class OrdenesCompraController {
   constructor(private readonly ordenesCompraService: OrdenesCompraService) { }
 
   @Post()
-  @Auth()
+  //@Auth()
   create(@Body() createOrdenCompraDto: CreateOrdenCompraDto) {
     return this.ordenesCompraService.create(createOrdenCompraDto);
   }
@@ -29,6 +29,11 @@ export class OrdenesCompraController {
   @Patch(':id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() updateOrdenCompraDto: UpdateOrdenCompraDto) {
     return this.ordenesCompraService.update(id, updateOrdenCompraDto);
+  }
+
+  @Patch(':id/cambiar-estado')
+  cambiarEstado(@Param('id', ParseUUIDPipe) id: string, @Body('estado') estado: EstadoOrdenCompra) {
+    return this.ordenesCompraService.cambiarEstado(id, estado);
   }
 
   @Delete(':id')

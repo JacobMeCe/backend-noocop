@@ -95,4 +95,6 @@ export class OrdenCompra {
 
   @UpdateDateColumn()
   actualizado_en: Date;
+
+
 }
