@@ -1,6 +1,7 @@
 import type { StyleDictionary, TDocumentDefinitions } from 'pdfmake/interfaces';
 import { CurrencyFormater, DateFormatter } from 'src/common/helpers';
 import { OrdenCompra } from '../ordenes-compra/entities';
+import { Column } from 'typeorm';
 
 interface ReportValues {
     title?: string;
@@ -34,176 +35,160 @@ export const getOrdenCompraReport = (
 ): TDocumentDefinitions => {
     const { OrdenCompra } = values;
     const docDefinition: TDocumentDefinitions = {
-        pageSize: {
-            width: 27.94 * 28.3465, // Ancho de carta en horizontal (27.94 cm)
-            height: 21.59 * 28.3465, // Alto de carta en horizontal (21.59 cm)
-        },
+        pageSize: 'LETTER',
         pageOrientation: 'portrait',
         styles: styles,
-        // background: {
-
-        //     ///home/jacob/workspace/Backend/Backend-Presidencia/backend-noocop/src/common/assets/H. AYUNTAMIENTO CONSTITUCIONAL_pages-to-jpg-0001.jpg
-        //     image: 'src/common/assets/fondo.jpg', // Ruta de tu imagen de fondo
-        //     width: 21.40 * 28.3465,
-        //     height: 17.50 * 28.3465,
-        //     absolutePosition: { x: 0, y: 0 }
-        // },
-        pageMargins: [0, 0, 0, 0],
+        pageMargins: [30, 20, 30, 30],
         content: [
-            // Nombre del proveedor (3cm, 3cm)
             {
-                text: OrdenCompra.proveedor.nombre_proveedor,
-                absolutePosition: {
-                    x: 3 * 28.3465,
-                    y: 3 * 28.3465
-                },
-                fontSize: 10,
+                columns: [
+                    {
+                        image: 'src/common/assets/autlan-logo.png',
+                        width: 50,
+                    },
+                    {
+                        width: '*',
+                        alignment: 'center',
+                        stack: [
+                            { text: 'H. AYUNTAMIENTO CONSTITUCIONAL', fontSize: 12, bold: true },
+                            { text: 'DE AUTLÁN DE NAVARRO, JALISCO.', fontSize: 10 },
+                            { text: 'ORDEN DE COMPRA', fontSize: 10, margin: [0, 2, 0, 0] }
+                        ]
+                    },
+                    {
+                        width: 150,
+                        table: {
+                            widths: ['auto', '*'],
+                            body: [
+                                [
+                                    { text: 'FOLIO', bold: true, fillColor: '#222', color: 'white', alignment: 'center' },
+                                    { text: `C`, alignment: 'right' },
+                                ]
+                            ]
+                        },
+                    }
+                ]
             },
-            // Dirección proveedor (2.5cm, 3.60cm)
+
             {
-                text: OrdenCompra.proveedor.domicilio || '',
-                absolutePosition: {
-                    x: 2.5 * 28.3465,
-                    y: 3.60 * 28.3465
-                },
-                fontSize: 10,
-            },
-            // Ciudad proveedor (2cm, 4.20cm)
-            {
-                text: OrdenCompra.proveedor.poblacion || '',
-                absolutePosition: {
-                    x: 2 * 28.3465,
-                    y: 4.20 * 28.3465
-                },
-                fontSize: 10,
-            },
-            // Fecha (14.50cm, 4.20cm)
-            {
-                text: DateFormatter.getDDMMYYYY(new Date(OrdenCompra.creado_en)),
-                absolutePosition: {
-                    x: 14.50 * 28.3465,
-                    y: 4.20 * 28.3465
-                },
-                fontSize: 10,
-            },
-            // Nombre área (5.50cm, 13cm)
-            {
-                text: OrdenCompra.area.nombre || '',
-                absolutePosition: {
-                    x: 5.50 * 28.3465,
-                    y: 13 * 28.3465
-                },
-                fontSize: 10,
-            },
-            // Aplicación o destino (4.24cm, 13.50cm)
-            {
-                text: OrdenCompra.aplicacion_destino || '',
-                absolutePosition: {
-                    x: 5 * 28.3465,
-                    y: 13.50 * 28.3465
-                },
-                fontSize: 10,
-            },
-            // Elaboró (2.50cm, 14.50cm)
-            {
-                text: OrdenCompra.area.encargado || '',
-                absolutePosition: {
-                    x: 2.50 * 28.3465,
-                    y: 14.50 * 28.3465
-                },
-                fontSize: 10,
-            },
-            // Solicita (2cm, 15.30cm)
-            {
-                text: OrdenCompra.area.encargado || '',
-                absolutePosition: {
-                    x: 2 * 28.3465,
-                    y: 15 * 28.3465
-                },
-                fontSize: 10,
-            },
-            // Puesto (2cm, 15.60cm)
-            {
-                text: OrdenCompra.area.puesto || '',
-                absolutePosition: {
-                    x: 2 * 28.3465,
-                    y: 15.60 * 28.3465
-                },
-                fontSize: 10,
-            },
-            // Tabla de productos (0.90cm, 5.50cm con margen)
-            {
-                absolutePosition: {
-                    x: 0.90 * 28.3465,
-                    y: 5.50 * 28.3465 // Agregado margen para centrar
-                },
+                margin: [0, 10, 0, 2],
                 table: {
-                    headerRows: 1,
-                    widths: [
-                        2.30 * 28.3465,  // Cantidad
-                        1.60 * 28.3465,  // Unidad
-                        9.00 * 28.3465, // Descripción
-                        2.20 * 28.3465,  // Costo
-                        2.80 * 28.3465   // Total
-                    ],
+                    widths: ['auto', '*', 80, '*'],
+
                     body: [
-                        // Encabezados
                         [
-                            { text: '', style: 'tableHeader', alignment: 'center', fontSize: 8 },
-                            { text: '', style: 'tableHeader', alignment: 'center', fontSize: 8 },
-                            { text: '', style: 'tableHeader', alignment: 'center', fontSize: 8 },
-                            { text: '', style: 'tableHeader', alignment: 'center', fontSize: 8 },
-                            { text: '', style: 'tableHeader', alignment: 'center', fontSize: 8 }
+                            { text: 'PROVEEDOR:', bold: true, fontSize: 8 },
+                            { text: OrdenCompra?.proveedor?.nombre_proveedor, fontSize: 8 },
+                            { border: [false, true, false, false], text: '', fontSize: 8 },
+                            { border: [false, true, true, false], text: '', fontSize: 8 },
                         ],
-                        // Productos
-                        ...OrdenCompra.productos.map(producto => [
-                            { text: producto.cantidad || '', alignment: 'center', fontSize: 8 },
-                            { text: producto.unidad || '', alignment: 'center', fontSize: 8 },
-                            { text: producto.descripcion || '', alignment: 'left', fontSize: 8 },
-                            { text: CurrencyFormater.formatCurrency(producto.costo_sin_iva || 0), alignment: 'right', fontSize: 8 },
-                            { text: CurrencyFormater.formatCurrency(producto.total_producto || 0), alignment: 'right', fontSize: 8 }
-                        ])
+                        [
+                            { text: 'DIRECCIÓN:', bold: true, fontSize: 8 },
+                            { text: OrdenCompra?.proveedor?.domicilio, fontSize: 8 },
+                            { border: [false, false, false, false], text: '', fontSize: 8 },
+                            { border: [false, false, true, false], text: '', fontSize: 8 },
+                        ],
+                        [
+                            { text: 'CIUDAD:', bold: true, fontSize: 8 },
+                            { text: OrdenCompra?.proveedor?.poblacion, fontSize: 8 },
+                            { text: 'FECHA:', bold: true, fontSize: 8 },
+                            { text: DateFormatter.getDDMMYYYY(OrdenCompra?.creado_en), fontSize: 8 }
+                        ],
+                    ],
+                },
+            },
+            { text: 'SR. PROVEEDOR SOLICITAMOS A UD. (SURTIR) LOS SIGUIENTES BIENES AL PORTADOR DE LA PRESENTE ORDEN DE COMPRA, MISMA QUE SE DEBERÁ ANEXAR A LA FACTURA PARA EL COBRO.', fontSize: 6, margin: [0, 2, 0, 2] },
+            {
+                table: {
+                    widths: [40, 40, 265, 80, 80],
+                    body: [
+                        [
+                            { text: 'CANTIDAD', bold: true, alignment: 'center', fontSize: 8, color: 'white', fillColor: '#222' },
+                            { text: 'UNIDAD', bold: true, alignment: 'center', fontSize: 8, color: 'white', fillColor: '#222' },
+                            { text: 'DESCRIPCIÓN', bold: true, alignment: 'center', fontSize: 8, color: 'white', fillColor: '#222' },
+                            { text: 'COSTO', bold: true, alignment: 'center', fontSize: 8, color: 'white', fillColor: '#222' },
+                            { text: 'IMPORTE', bold: true, alignment: 'center', fontSize: 8, color: 'white', fillColor: '#222' }
+                        ],
+                        ...((OrdenCompra?.productos || []).map(p => [
+                            { text: p.cantidad, alignment: 'center', fontSize: 9 },
+                            { text: p.unidad, alignment: 'center', fontSize: 9 },
+                            { text: p.descripcion, fontSize: 9 },
+                            { text: CurrencyFormater.formatCurrency(Number(p.costo_sin_iva)), alignment: 'right', fontSize: 9 },
+                            { text: CurrencyFormater.formatCurrency(Number(p.importe)), alignment: 'right', fontSize: 9 }
+                        ])),
+                        [
+                            { text: '', colSpan: 5, border: [false, false, false, false], margin: [0, 30, 0, 30] }, '', '', '', ''
+                        ]
                     ]
                 },
-                layout: 'noBorders'
+                margin: [0, 0, 0, 10]
             },
-            // Subtotal (17.50cm, 13cm)
             {
-                text: CurrencyFormater.formatCurrency(OrdenCompra.subtotal || 0),
-                absolutePosition: {
-                    x: 17.50 * 28.3465,
-                    y: 13 * 28.3465
-                },
-                fontSize: 10,
+                columns: [
+                    {
+                        width: 200,
+                        stack: [
+                            { text: 'APLICACIÓN O DESTINO', fontSize: 8 },
+                            { text: OrdenCompra?.aplicacion_destino || '_________________', fontSize: 8 },
+                            { text: 'ÁREA O DEPTO. QUE SOLICITA', fontSize: 8 },
+                            { text: OrdenCompra?.area?.nombre || '_________________', fontSize: 8 }
+                        ]
+                    },
+                    {
+                        width: 120,
+                        table: {
+                            widths: ['*'],
+                            body: [
+                                [{ text: 'SUB-TOTAL', fontSize: 8 }],
+                                [{ text: CurrencyFormater.formatCurrency(Number(OrdenCompra?.subtotal || 0)), fontSize: 8 }],
+                                [{ text: 'DESCUENTO', fontSize: 8 }],
+                                [{ text: CurrencyFormater.formatCurrency(Number(OrdenCompra?.descuento || 0)), fontSize: 8 }],
+                                [{ text: 'I.V.A.', fontSize: 8 }],
+                                [{ text: CurrencyFormater.formatCurrency(Number(OrdenCompra?.iva || 0)), fontSize: 8 }],
+                                [{ text: 'TOTAL', fontSize: 8, bold: true }],
+                                [{ text: CurrencyFormater.formatCurrency(Number(OrdenCompra?.total || 0)), fontSize: 8, bold: true }]
+                            ]
+                        },
+                        layout: 'noBorders'
+                    }
+                ]
             },
-            // Descuento (17.50cm, 13.50cm)
+            { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 540, y2: 0, lineWidth: 1 }], margin: [0, 10, 0, 5] },
             {
-                text: CurrencyFormater.formatCurrency(OrdenCompra.descuento || 0),
-                absolutePosition: {
-                    x: 17.50 * 28.3465,
-                    y: 13.50 * 28.3465
+                table: {
+                    widths: [120, 120, 120, 120],
+                    body: [
+                        [
+                            { text: 'SOLICITA', alignment: 'center', fontSize: 8 },
+                            { text: 'AUTORIZA', alignment: 'center', fontSize: 8 },
+                            { text: 'RECIBE', alignment: 'center', fontSize: 8 },
+                            { text: '', border: [false, false, false, false] }
+                        ],
+                        [
+                            { text: '_________________', fontSize: 8 },
+                            { text: '_________________', fontSize: 8 },
+                            { text: '_________________', fontSize: 8 },
+                            { text: '', border: [false, false, false, false] }
+                        ],
+                        [
+                            { text: '_________________', fontSize: 8 },
+                            { text: 'JEFE DEPARTAMENTO', fontSize: 8 },
+                            { text: 'TESORERÍA', fontSize: 8 },
+                            { text: '', border: [false, false, false, false] }
+                        ]
+                    ]
                 },
-                fontSize: 10,
+                layout: 'noBorders',
+                margin: [0, 10, 0, 0]
             },
-            // IVA (17.50cm, 14cm)
+            { text: 'HAAG No. 11-C', fontSize: 7, margin: [0, 10, 0, 0] },
             {
-                text: CurrencyFormater.formatCurrency(OrdenCompra.iva || 0),
-                absolutePosition: {
-                    x: 17.50 * 28.3465,
-                    y: 14 * 28.3465
-                },
-                fontSize: 10,
-            },
-            // Total (17.50cm, 14.50cm)
-            {
-                text: CurrencyFormater.formatCurrency(OrdenCompra.total || 0),
-                absolutePosition: {
-                    x: 17.50 * 28.3465,
-                    y: 14.50 * 28.3465
-                },
-                fontSize: 10,
-            },
-        ],
+                columns: [
+                    { text: 'Proveedor: Original', fontSize: 7, alignment: 'left' },
+                    { text: 'Copia: Tesorería', fontSize: 7, alignment: 'right' }
+                ]
+            }
+        ]
     };
 
     return docDefinition;
