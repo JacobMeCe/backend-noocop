@@ -1,4 +1,5 @@
-import { IsArray, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { IsArray, IsEnum, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { ValidRoles } from "src/auth/interfaces";
 
 export class CreateUserDto {
 
@@ -21,5 +22,6 @@ export class CreateUserDto {
 
     @IsArray()
     @IsOptional()
+    @IsEnum(ValidRoles, { each: true })
     roles?: string[];
 }

@@ -4,16 +4,18 @@ import { CreateOrdenCompraDto } from './dto/create-orden-compra.dto';
 import { UpdateOrdenCompraDto } from './dto/update-orden-compra.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { EstadoOrdenCompra } from './entities/ordenes-compra.entity';
-import { Auth } from 'src/auth/decorators';
+import { Auth, GetUser } from 'src/auth/decorators';
+import { ValidRoles } from 'src/auth/interfaces';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('ordenes-compra')
 export class OrdenesCompraController {
   constructor(private readonly ordenesCompraService: OrdenesCompraService) { }
 
   @Post()
-  //@Auth()
-  create(@Body() createOrdenCompraDto: CreateOrdenCompraDto) {
-    return this.ordenesCompraService.create(createOrdenCompraDto);
+  @Auth(ValidRoles.ordenes_compra)
+  create(@Body() createOrdenCompraDto: CreateOrdenCompraDto, @GetUser() user: User) {
+    return this.ordenesCompraService.create(createOrdenCompraDto, user);
   }
 
   @Get()

@@ -17,6 +17,7 @@ import { Proveedor } from '../proveedor/entities/proveedor.entity';
 import { Area } from '../areas/entities/area.entity';
 import { Partida } from '../partida/entities/partida.entity';
 import { PaginationDto } from '../../common/dtos/pagination.dto';
+import { User } from '../../users/entities/user.entity';
 
 @Injectable()
 export class OrdenesCompraService {
@@ -39,7 +40,7 @@ export class OrdenesCompraService {
     private partidaRepository: Repository<Partida>,
   ) { }
 
-  async create(createOrdenCompraDto: CreateOrdenCompraDto): Promise<OrdenCompra> {
+  async create(createOrdenCompraDto: CreateOrdenCompraDto, user: User): Promise<OrdenCompra> {
     try {
       // Validar existencia de proveedor, área y partida
       await this.validarEntidadesRelacionadas(
@@ -60,7 +61,8 @@ export class OrdenesCompraService {
         partida_id: createOrdenCompraDto.partida_id,
         aplicacion_destino: createOrdenCompraDto.aplicacion_destino,
         porcentaje_descuento: createOrdenCompraDto.porcentaje_descuento || 0,
-        estado: EstadoOrdenCompra.ACTIVA
+        estado: EstadoOrdenCompra.ACTIVA,
+        creado_por_id: user?.id
       });
 
       const ordenGuardada = await this.ordenCompraRepository.save(orden);
@@ -105,7 +107,8 @@ export class OrdenesCompraService {
       .leftJoinAndSelect('orden.proveedor', 'proveedor')
       .leftJoinAndSelect('orden.area', 'area')
       .leftJoinAndSelect('orden.partida', 'partida')
-      .leftJoinAndSelect('orden.productos', 'productos');
+      .leftJoinAndSelect('orden.productos', 'productos')
+      .leftJoinAndSelect('orden.creado_por', 'creado_por');
 
     // Filtrar por estado si se proporciona
     if (estado) {
@@ -140,7 +143,7 @@ export class OrdenesCompraService {
 
     const orden = await this.ordenCompraRepository.findOne({
       where: { id, estado: Not(EstadoOrdenCompra.ELIMINADA) },
-      relations: ['proveedor', 'area', 'partida', 'productos']
+      relations: ['proveedor', 'area', 'partida', 'productos', 'creado_por']
     });
 
     if (!orden) {

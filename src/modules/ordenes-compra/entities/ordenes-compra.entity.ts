@@ -11,6 +11,7 @@ import {
 import { Proveedor } from '../../proveedor/entities/proveedor.entity';
 import { Area } from '../../areas/entities/area.entity';
 import { Partida } from '../../partida/entities/partida.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export enum EstadoOrdenCompra {
   ACTIVA = 'activa',
@@ -95,6 +96,14 @@ export class OrdenCompra {
 
   @UpdateDateColumn()
   actualizado_en: Date;
+
+  // Usuario que creó la orden
+  @ManyToOne(() => User, { eager: true, nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'creado_por_id' })
+  creado_por?: User;
+
+  @Column('uuid', { nullable: true })
+  creado_por_id?: string;
 
 
 }
