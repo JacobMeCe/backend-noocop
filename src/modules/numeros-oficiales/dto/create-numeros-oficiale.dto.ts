@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MaxLength, MinLength } from "class-validator";
+import { IsString, IsOptional, MaxLength, MinLength, IsUUID, IsArray } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateNumerosOficialeDto {
@@ -159,4 +159,20 @@ export class CreateNumerosOficialeDto {
     @IsOptional()
     @IsString()
     observaciones?: string;
+
+    @ApiPropertyOptional({
+        description: 'ID del usuario que crea el registro (uuid). Normalmente se autoasigna desde el contexto de autenticación.',
+        format: 'uuid',
+        example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+    })
+    @IsOptional()
+    @IsUUID()
+    createdById?: string;
+
+    @ApiProperty()
+    @IsString({ each: true })
+    @IsArray()
+    @IsOptional()
+    images?: string[];
+
 }

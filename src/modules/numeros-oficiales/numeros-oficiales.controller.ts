@@ -4,6 +4,9 @@ import { NumerosOficialesService } from './numeros-oficiales.service';
 import { CreateNumerosOficialeDto } from './dto/create-numeros-oficiale.dto';
 import { UpdateNumerosOficialeDto } from './dto/update-numeros-oficiale.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { Auth, GetUser } from 'src/auth/decorators';
+import { ValidRoles } from 'src/auth/interfaces';
+import { User } from 'src/users/entities/user.entity';
 
 @ApiTags('numeros-oficiales')
 @Controller('numeros-oficiales')
@@ -11,18 +14,12 @@ export class NumerosOficialesController {
   constructor(private readonly numerosOficialesService: NumerosOficialesService) { }
 
   @Post()
+  @Auth(ValidRoles.numeros_oficiales)
   @ApiOperation({ summary: 'Crear un nuevo número oficial' })
   @ApiResponse({ status: 201, description: 'Número oficial creado exitosamente.' })
   @ApiResponse({ status: 400, description: 'Datos inválidos.' })
-  create(@Body() createNumerosOficialeDto: CreateNumerosOficialeDto) {
-    return this.numerosOficialesService.create(createNumerosOficialeDto);
-  }
-
-  @Get()
-  @ApiOperation({ summary: 'Obtener todos los números oficiales con paginación' })
-  @ApiResponse({ status: 200, description: 'Lista de números oficiales obtenida exitosamente.' })
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.numerosOficialesService.findAll(paginationDto);
+  create(@Body() createNumerosOficialeDto: CreateNumerosOficialeDto, @GetUser() user: User) {
+    return this.numerosOficialesService.create(createNumerosOficialeDto, user.id);
   }
 
   @Get('search')
@@ -45,10 +42,11 @@ export class NumerosOficialesController {
   }
 
   @Patch(':id')
+  @Auth(ValidRoles.numeros_oficiales)
   @ApiOperation({ summary: 'Actualizar un número oficial' })
   @ApiResponse({ status: 200, description: 'Número oficial actualizado exitosamente.' })
   @ApiResponse({ status: 404, description: 'Número oficial no encontrado.' })
-  update(@Param('id') id: string, @Body() updateNumerosOficialeDto: UpdateNumerosOficialeDto) {
+  update(@Param('id') id: string, @Body() updateNumerosOficialeDto: UpdateNumerosOficialeDto, @GetUser() user: User) {
     return this.numerosOficialesService.update(id, updateNumerosOficialeDto);
   }
 

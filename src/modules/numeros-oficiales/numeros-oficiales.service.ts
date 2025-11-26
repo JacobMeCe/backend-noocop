@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { isUUID } from 'class-validator';
+import { NumerosOficialeImage } from './entities/numeros-oficiale-image.entity';
 
 @Injectable()
 export class NumerosOficialesService {
@@ -20,11 +21,23 @@ export class NumerosOficialesService {
   constructor(
     @InjectRepository(NumerosOficiale)
     private numerosOficialesRepository: Repository<NumerosOficiale>,
+    @InjectRepository(NumerosOficialeImage)
+    private numerosOficialeImageRepository: Repository<NumerosOficialeImage>,
   ) { }
 
-  async create(createNumerosOficialeDto: CreateNumerosOficialeDto) {
+  async create(
+    createNumerosOficialeDto: CreateNumerosOficialeDto,
+    userId?: string,
+  ) {
     try {
-      const numeroOficial = this.numerosOficialesRepository.create(createNumerosOficialeDto);
+      const { images = [], ...numeroOficialData } = createNumerosOficialeDto;
+      const numeroOficial = this.numerosOficialesRepository.create({
+        ...numeroOficialData,
+        createdById: userId ?? createNumerosOficialeDto.createdById ?? null,
+        images: images.map((image) =>
+          this.numerosOficialeImageRepository.create({ url: image }),
+        ),
+      });
       await this.numerosOficialesRepository.save(numeroOficial);
 
       return numeroOficial;
@@ -39,7 +52,7 @@ export class NumerosOficialesService {
       take: limit,
       skip: offset,
       order: {
-        numeroFolio: 'ASC',
+        createdAt: 'DESC',
       },
     });
 
@@ -80,7 +93,7 @@ export class NumerosOficialesService {
     const { limit = 10, offset = 0 } = paginationDto;
     const queryBuilder = this.numerosOficialesRepository.createQueryBuilder();
     const [data, count] = await queryBuilder
-      .where("numeroFolio ILIKE :term OR nombrePropietario ILIKE :term OR direccion ILIKE :term", { term: `%${term}%` })
+      .where("numeroFolio ILIKE :term OR nombrePropietario ILIKE :term OR direccion ILIKE :term OR usoSuelo ILIKE :term", { term: `%${term}%` })
       .take(limit)
       .skip(offset)
       .getManyAndCount();
@@ -97,16 +110,37 @@ export class NumerosOficialesService {
     };
   }
 
-  async update(id: string, updateNumerosOficialeDto: UpdateNumerosOficialeDto) {
+  async update(
+    id: string,
+    updateNumerosOficialeDto: UpdateNumerosOficialeDto,
+  ) {
+    const { images, ...toUpdate } = updateNumerosOficialeDto;
     const numeroOficial = await this.numerosOficialesRepository.preload({
       id: id,
-      ...updateNumerosOficialeDto,
+      ...toUpdate,
     });
 
     if (!numeroOficial)
       throw new NotFoundException(`Número oficial con id: ${id} no encontrado`);
 
     try {
+
+      if (images) {
+        const existingImages = await this.numerosOficialeImageRepository.find({
+          where: { numeroOficiale: { id } },
+        });
+        const existingUrls = existingImages.map((image) => image.url);
+        const newImages = images
+          .filter((image) => !existingUrls.includes(image))
+          .map((image) =>
+            this.numerosOficialeImageRepository.create({
+              url: image,
+              numeroOficiale: numeroOficial,
+            }),
+          );
+
+        numeroOficial.images = [...existingImages, ...newImages];
+      }
       await this.numerosOficialesRepository.save(numeroOficial);
       return numeroOficial;
     } catch (error) {

@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { User } from '../../../users/entities/user.entity';
+import { NumerosOficialeImage } from './numeros-oficiale-image.entity';
 
 @Entity('numeros_oficiales')
 export class NumerosOficiale {
@@ -68,4 +70,23 @@ export class NumerosOficiale {
 
     @UpdateDateColumn({ type: 'timestamp' })
     updatedAt: Date;
+
+    @Column({ type: 'uuid', name: 'created_by_id', nullable: true })
+    createdById: string | null;
+
+    @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'created_by_id' })
+    createdBy: User | null;
+
+    @Column({ type: 'uuid', name: 'updated_by_id', nullable: true })
+    updatedById: string | null;
+
+    @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'updated_by_id' })
+    updatedBy: User | null;
+
+    @OneToMany(() => NumerosOficialeImage, (numerosOficialeImage) => numerosOficialeImage.numeroOficiale, {
+        cascade: true,
+    })
+    images?: NumerosOficialeImage[];
 }
