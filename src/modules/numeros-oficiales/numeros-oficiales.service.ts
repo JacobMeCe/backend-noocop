@@ -30,9 +30,18 @@ export class NumerosOficialesService {
     userId?: string,
   ) {
     try {
-      const { images = [], ...numeroOficialData } = createNumerosOficialeDto;
+      const { images = [], numeroFolio, ...numeroOficialData } = createNumerosOficialeDto;
+
+      // Generar numeroFolio automáticamente si no se proporciona
+      let generatedFolio = numeroFolio;
+      if (!generatedFolio) {
+        generatedFolio = await this.generateNumeroFolio();
+      }
+
+
       const numeroOficial = this.numerosOficialesRepository.create({
         ...numeroOficialData,
+        numeroFolio: generatedFolio,
         createdById: userId ?? createNumerosOficialeDto.createdById ?? null,
         images: images.map((image) =>
           this.numerosOficialeImageRepository.create({ url: image }),
@@ -44,6 +53,29 @@ export class NumerosOficialesService {
     } catch (error) {
       this.handleDBException(error);
     }
+  }
+
+  private async generateNumeroFolio(): Promise<string> {
+    // Buscar el último folio registrado
+    const lastNumero = await this.numerosOficialesRepository
+      .createQueryBuilder('numero')
+      .orderBy('numero.numeroFolio', 'DESC')
+      .getOne();
+
+    let nextNumber = 4331; // Valor inicial si no hay registros
+
+    if (lastNumero && lastNumero.numeroFolio) {
+      // Extraer el número del folio y sumar 1
+      const currentNumber = parseInt(lastNumero.numeroFolio, 10);
+      if (!isNaN(currentNumber)) {
+        nextNumber = currentNumber + 1;
+      }
+    }
+
+    // Formatear el número con ceros a la izquierda (7 dígitos: 0004331, 0004332, etc.)
+    const paddedNumber = nextNumber.toString().padStart(7, '0');
+
+    return paddedNumber;
   }
 
   async findAll(paginatioDto: PaginationDto) {
@@ -114,7 +146,8 @@ export class NumerosOficialesService {
     id: string,
     updateNumerosOficialeDto: UpdateNumerosOficialeDto,
   ) {
-    const { images, ...toUpdate } = updateNumerosOficialeDto;
+    const { images, derechos, forma, ...toUpdate } = updateNumerosOficialeDto;
+
     const numeroOficial = await this.numerosOficialesRepository.preload({
       id: id,
       ...toUpdate,
@@ -124,6 +157,16 @@ export class NumerosOficialesService {
       throw new NotFoundException(`Número oficial con id: ${id} no encontrado`);
 
     try {
+      // Actualizar derechos y forma si se proporcionan
+      if (derechos !== undefined) {
+        numeroOficial.derechos = derechos;
+      }
+      if (forma !== undefined) {
+        numeroOficial.forma = forma;
+      }
+
+      // Recalcular el importe total
+      numeroOficial.importeTotal = Number(numeroOficial.derechos) + Number(numeroOficial.forma);
 
       if (images) {
         const existingImages = await this.numerosOficialeImageRepository.find({

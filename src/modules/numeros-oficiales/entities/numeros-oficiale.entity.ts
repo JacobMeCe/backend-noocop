@@ -65,6 +65,20 @@ export class NumerosOficiale {
     @Column({ type: 'text', nullable: true })
     observaciones: string;
 
+    // Número oficial asignado
+    @Column({ type: 'varchar', length: 50, nullable: true })
+    numeroOficialAsignado: string;
+
+    // Costos
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    derechos: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    forma: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    importeTotal: number;
+
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;
 

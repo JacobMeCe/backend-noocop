@@ -1,17 +1,19 @@
-import { IsString, IsOptional, MaxLength, MinLength, IsUUID, IsArray } from "class-validator";
+import { IsString, IsOptional, MaxLength, MinLength, IsUUID, IsArray, IsNumber, Min } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Type } from "class-transformer";
 
 export class CreateNumerosOficialeDto {
 
-    @ApiProperty({
-        description: 'Número de folio único del número oficial',
-        example: 'NO-2024-001',
+    @ApiPropertyOptional({
+        description: 'Número de folio único del número oficial (se genera automáticamente si no se proporciona)',
+        example: '0004331',
         maxLength: 50
     })
+    @IsOptional()
     @IsString()
     @MinLength(1)
     @MaxLength(50)
-    numeroFolio: string;
+    numeroFolio?: string;
 
     // Ubicación del predio
     @ApiProperty({
@@ -159,6 +161,49 @@ export class CreateNumerosOficialeDto {
     @IsOptional()
     @IsString()
     observaciones?: string;
+
+    @ApiPropertyOptional({
+        description: 'Número oficial asignado',
+        example: '123-A',
+        maxLength: 50
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(50)
+    numeroOficialAsignado?: string;
+
+    @ApiPropertyOptional({
+        description: 'Monto de derechos',
+        example: 1500.50,
+        default: 0
+    })
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    @Type(() => Number)
+    derechos?: number;
+
+    @ApiPropertyOptional({
+        description: 'Monto de forma',
+        example: 250.75,
+        default: 0
+    })
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    @Type(() => Number)
+    forma?: number;
+
+    @ApiPropertyOptional({
+        description: 'Importe total (suma de derechos y forma)',
+        example: 1751.25,
+        default: 0
+    })
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    @Type(() => Number)
+    importeTotal?: number;
 
     @ApiPropertyOptional({
         description: 'ID del usuario que crea el registro (uuid). Normalmente se autoasigna desde el contexto de autenticación.',
