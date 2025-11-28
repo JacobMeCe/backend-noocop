@@ -59,7 +59,6 @@ export class OrdenesCompraReportService
   }
 
   async proveedoresUsadosEnMes(fechaInicio: Date, fechaFin: Date) {
-    // Obtener las órdenes de compra dentro del rango de fechas
     const ordenesCompra = await this.ordenCompraRepository
       .createQueryBuilder('orden')
       .leftJoinAndSelect('orden.proveedor', 'proveedor')
