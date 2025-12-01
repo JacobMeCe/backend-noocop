@@ -6,6 +6,7 @@ import { Repository, Between } from 'typeorm';
 import { getNumerosOficialesReport } from '../reports/getNumerosOficiales.report';
 import { getNumerosOficialesPorMesReport } from '../reports/numerosOficialesPorMes.report';
 import ExcelJS from 'exceljs';
+import { getNumerosOficialesListaReport } from '../reports';
 
 @Injectable()
 export class NumerosOficialesReportService
@@ -75,10 +76,8 @@ export class NumerosOficialesReportService
         const rangoInicio = numerosOficiales.length ? new Date(numerosOficiales[numerosOficiales.length - 1].createdAt) : new Date(0);
         const rangoFin = numerosOficiales.length ? new Date(numerosOficiales[0].createdAt) : new Date();
 
-        const docDefinition = getNumerosOficialesPorMesReport({
+        const docDefinition = getNumerosOficialesListaReport({
             numerosOficiales,
-            fechaInicio: rangoInicio,
-            fechaFin: rangoFin,
         });
         const doc = this.printerService.creatPdf(docDefinition);
         return doc;

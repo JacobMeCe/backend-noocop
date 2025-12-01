@@ -2,9 +2,7 @@ import type { StyleDictionary, TDocumentDefinitions } from 'pdfmake/interfaces';
 import { DateFormatter } from 'src/common/helpers';
 import { NumerosOficiale } from '../numeros-oficiales/entities/numeros-oficiale.entity';
 
-interface NumerosOficialesMesReportValues {
-    fechaInicio: Date;
-    fechaFin: Date;
+interface NumerosOficialesListaReportValues {
     numerosOficiales: NumerosOficiale[];
 }
 
@@ -39,10 +37,10 @@ const styles: StyleDictionary = {
     },
 };
 
-export const getNumerosOficialesPorMesReport = (
-    values: NumerosOficialesMesReportValues,
+export const getNumerosOficialesListaReport = (
+    values: NumerosOficialesListaReportValues,
 ): TDocumentDefinitions => {
-    const { fechaInicio, fechaFin, numerosOficiales } = values;
+    const { numerosOficiales } = values;
 
     // Agrupar números oficiales por día
     const registrosPorDia = numerosOficiales.reduce((acc, n) => {
@@ -148,7 +146,7 @@ export const getNumerosOficialesPorMesReport = (
         },
         content: [
             {
-                text: `Del ${DateFormatter.getDDMMMMYYYY(fechaInicio)} Al ${DateFormatter.getDDMMMMYYYY(fechaFin)}`,
+                text: `Lista de Números Oficiales Completa`,
                 alignment: 'center',
             },
             {
