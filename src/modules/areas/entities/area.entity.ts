@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Vehiculo } from 'src/modules/vehiculos/entities/vehiculo.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -47,4 +48,7 @@ export class Area {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   actualizado_en: Date;
+
+    @OneToMany(() => Vehiculo, (vehiculo) => vehiculo.area)
+  vehiculo: Vehiculo[];
 }

@@ -15,6 +15,8 @@ import { PartidaModule } from './modules/partida/partida.module';
 import { PrinterModule } from './modules/printer/printer.module';
 import { OrdenesCompraReportModule } from './modules/ordenes-compra-report/ordenes-compra-report.module';
 import { NumerosOficialesReportModule } from './modules/numeros-oficiales-report/numeros-oficiales-report.module';
+import { VehiculosModule } from './modules/vehiculos/vehiculos.module';
+import { VehiculosReportModule } from './modules/vehiculos-report/vehiculos-report.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { NumerosOficialesReportModule } from './modules/numeros-oficiales-report
     PrinterModule,
     OrdenesCompraReportModule,
     NumerosOficialesReportModule,
+    VehiculosModule,
+    VehiculosReportModule,
   ],
 })
 export class AppModule { }
