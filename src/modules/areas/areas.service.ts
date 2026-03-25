@@ -27,7 +27,7 @@ export class AreasService {
       const area = this.areaRepository.create(createAreaDto);
       await this.areaRepository.save(area);
 
-      return area;
+       return area;
     } catch (error) {
       this.handleDBException(error);
     }

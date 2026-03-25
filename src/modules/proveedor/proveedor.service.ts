@@ -32,7 +32,6 @@ export class ProveedorService {
       this.handleDBException(error);
     }
   }
-
   async findAll(paginatioDto: PaginationDto) {
     const { limit = 10, offset = 0 } = paginatioDto;
     const [data, count] = await this.proveedorRepository.findAndCount({
