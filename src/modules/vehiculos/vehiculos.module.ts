@@ -6,18 +6,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Vehiculo } from './entities/vehiculo.entity';
 import { VehiculoImage } from './entities/vehiculo-image.entity';
 import { ServicioVehiculo } from './entities/servicios-vehiculos.entity';
+import { GasolinaVehiculo } from './entities/gasolina-vehiculo.entity';
 import { Partida } from '../partida/entities/partida.entity';
 import { Area } from '../areas/entities/area.entity';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [VehiculosController],
-  providers: [VehiculosService, AreasService,],
+  providers: [VehiculosService, AreasService],
   imports: [
     TypeOrmModule.forFeature([
       Vehiculo,
       VehiculoImage,
       ServicioVehiculo,
+      GasolinaVehiculo,
       Area,
       Partida,
     ]),

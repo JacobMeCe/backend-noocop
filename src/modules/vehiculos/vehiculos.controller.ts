@@ -16,6 +16,8 @@ import { CreateVehiculoDto } from './dto/create-vehiculo.dto';
 import { UpdateVehiculoDto } from './dto/update-vehiculo.dto';
 import { CreateServicioVehiculoDto } from './dto/create-servicio-vehiculo.dto';
 import { UpdateServicioVehiculoDto } from './dto/update-servicio-vehiculo.dto';
+import { CreateGasolinaVehiculoDto } from './dto/create-gasolina-vehiculo.dto';
+import { UpdateGasolinaVehiculoDto } from './dto/update-gasolina-vehiculo.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Auth } from 'src/auth/decorators';
 
@@ -90,5 +92,45 @@ export class VehiculosController {
   removeServicio(@Param('servicioId', ParseUUIDPipe) servicioId: string) {
     return this.vehiculosService.removeServicio(servicioId);
   }
-}
 
+  // ─── Gasolina ───────────────────────────────────────────────────────────────
+
+  @Post(':vehiculoId/gasolinas')
+  @ApiOperation({ summary: 'Registrar carga de combustible para un vehículo' })
+  createGasolina(
+    @Param('vehiculoId', ParseUUIDPipe) vehiculoId: string,
+    @Body() createGasolinaDto: CreateGasolinaVehiculoDto,
+  ) {
+    return this.vehiculosService.createGasolina(vehiculoId, createGasolinaDto);
+  }
+
+  @Get(':vehiculoId/gasolinas')
+  @ApiOperation({ summary: 'Listar cargas de combustible de un vehículo' })
+  findAllGasolinas(
+    @Param('vehiculoId', ParseUUIDPipe) vehiculoId: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.vehiculosService.findAllGasolinas(vehiculoId, paginationDto);
+  }
+
+  @Get('gasolina/:gasolinaId')
+  @ApiOperation({ summary: 'Obtener un registro de gasolina por ID' })
+  findOneGasolina(@Param('gasolinaId', ParseUUIDPipe) gasolinaId: string) {
+    return this.vehiculosService.findOneGasolina(gasolinaId);
+  }
+
+  @Patch('gasolina/:gasolinaId')
+  @ApiOperation({ summary: 'Actualizar un registro de gasolina' })
+  updateGasolina(
+    @Param('gasolinaId', ParseUUIDPipe) gasolinaId: string,
+    @Body() updateGasolinaDto: UpdateGasolinaVehiculoDto,
+  ) {
+    return this.vehiculosService.updateGasolina(gasolinaId, updateGasolinaDto);
+  }
+
+  @Delete('gasolina/:gasolinaId')
+  @ApiOperation({ summary: 'Eliminar un registro de gasolina' })
+  removeGasolina(@Param('gasolinaId', ParseUUIDPipe) gasolinaId: string) {
+    return this.vehiculosService.removeGasolina(gasolinaId);
+  }
+}
