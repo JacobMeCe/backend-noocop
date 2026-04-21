@@ -1,5 +1,12 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Vehiculo } from './vehiculo.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export enum TipoCombustible {
   REGULAR = 'regular',
@@ -59,4 +66,11 @@ export class GasolinaVehiculo {
     eager: false,
   })
   vehiculo: Vehiculo;
+
+  @ManyToOne(() => User, { eager: true, nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'creado_por_id' })
+  creado_por?: User;
+
+  @Column('uuid', { nullable: true })
+  creado_por_id?: string;
 }

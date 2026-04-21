@@ -1,4 +1,11 @@
-import { IsOptional, IsEnum, IsInt, Min, IsString } from 'class-validator';
+import {
+  IsOptional,
+  IsEnum,
+  IsInt,
+  Min,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
 export class PaginationDto {
@@ -17,4 +24,8 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   term?: string;
+
+  @IsOptional()
+  @IsUUID()
+  areaId?: string;
 }

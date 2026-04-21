@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -9,6 +10,7 @@ import { VehiculoImage } from './vehiculo-image.entity';
 import { Area } from 'src/modules/areas/entities/area.entity';
 import { ServicioVehiculo } from './servicios-vehiculos.entity';
 import { GasolinaVehiculo } from './gasolina-vehiculo.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export enum Propietario {
   MUNICIPIO = 'municipio',
@@ -132,4 +134,11 @@ export class Vehiculo {
 
   @ManyToOne(() => Area, (area) => area.vehiculo, { eager: true })
   area: Area;
+
+  @ManyToOne(() => User, { eager: true, nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'creado_por_id' })
+  creado_por?: User;
+
+  @Column('uuid', { nullable: true })
+  creado_por_id?: string;
 }

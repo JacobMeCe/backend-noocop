@@ -19,7 +19,8 @@ import { UpdateServicioVehiculoDto } from './dto/update-servicio-vehiculo.dto';
 import { CreateGasolinaVehiculoDto } from './dto/create-gasolina-vehiculo.dto';
 import { UpdateGasolinaVehiculoDto } from './dto/update-gasolina-vehiculo.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { Auth } from 'src/auth/decorators';
+import { Auth, GetUser } from 'src/auth/decorators';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('vehiculos')
 export class VehiculosController {
@@ -28,8 +29,9 @@ export class VehiculosController {
   // ─── Vehículos ───────────────────────────────────────────────────────────────
 
   @Post()
-  create(@Body() createVehiculoDto: CreateVehiculoDto) {
-    return this.vehiculosService.create(createVehiculoDto);
+  @Auth()
+  create(@Body() createVehiculoDto: CreateVehiculoDto, @GetUser() user: User) {
+    return this.vehiculosService.create(createVehiculoDto, user);
   }
 
   @Get()
@@ -58,11 +60,17 @@ export class VehiculosController {
   // ─── Servicios ───────────────────────────────────────────────────────────────
 
   @Post(':vehiculoId/servicios')
+  @Auth()
   createServicio(
     @Param('vehiculoId', ParseUUIDPipe) vehiculoId: string,
     @Body() createServicioDto: CreateServicioVehiculoDto,
+    @GetUser() user: User,
   ) {
-    return this.vehiculosService.createServicio(vehiculoId, createServicioDto);
+    return this.vehiculosService.createServicio(
+      vehiculoId,
+      createServicioDto,
+      user,
+    );
   }
 
   @Get(':vehiculoId/servicios')
@@ -96,12 +104,18 @@ export class VehiculosController {
   // ─── Gasolina ───────────────────────────────────────────────────────────────
 
   @Post(':vehiculoId/gasolinas')
+  @Auth()
   @ApiOperation({ summary: 'Registrar carga de combustible para un vehículo' })
   createGasolina(
     @Param('vehiculoId', ParseUUIDPipe) vehiculoId: string,
     @Body() createGasolinaDto: CreateGasolinaVehiculoDto,
+    @GetUser() user: User,
   ) {
-    return this.vehiculosService.createGasolina(vehiculoId, createGasolinaDto);
+    return this.vehiculosService.createGasolina(
+      vehiculoId,
+      createGasolinaDto,
+      user,
+    );
   }
 
   @Get(':vehiculoId/gasolinas')
@@ -132,5 +146,14 @@ export class VehiculosController {
   @ApiOperation({ summary: 'Eliminar un registro de gasolina' })
   removeGasolina(@Param('gasolinaId', ParseUUIDPipe) gasolinaId: string) {
     return this.vehiculosService.removeGasolina(gasolinaId);
+  }
+
+  @Get('gasolinas/area/:areaId')
+  @ApiOperation({ summary: 'Listar cargas de combustible por área' })
+  findAllGasolinasByArea(
+    @Param('areaId', ParseUUIDPipe) areaId: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.vehiculosService.findAllGasolinasByArea(areaId, paginationDto);
   }
 }

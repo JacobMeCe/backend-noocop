@@ -20,6 +20,7 @@ import { ServicioVehiculo } from './entities/servicios-vehiculos.entity';
 import { GasolinaVehiculo } from './entities/gasolina-vehiculo.entity';
 import { Area } from '../areas/entities/area.entity';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class VehiculosService {
@@ -40,7 +41,7 @@ export class VehiculosService {
 
   // ─── Vehículos ───────────────────────────────────────────────────────────────
 
-  async create(createVehiculoDto: CreateVehiculoDto) {
+  async create(createVehiculoDto: CreateVehiculoDto, user: User) {
     const { images, areaId, ...vehiculoDetails } = createVehiculoDto;
 
     const area = await this.areaRepository.findOne({ where: { id: areaId } });
@@ -51,6 +52,7 @@ export class VehiculosService {
       const vehiculo = this.vehiculoRepository.create({
         ...vehiculoDetails,
         area,
+        creado_por_id: user?.id,
         images: images?.map((url) =>
           this.vehiculoImageRepository.create({ url }),
         ),
@@ -63,15 +65,19 @@ export class VehiculosService {
   }
 
   async findAll(paginationDto: PaginationDto) {
-    const { limit = 10, offset = 0, term } = paginationDto;
+    const { limit = 10, offset = 0, term, areaId } = paginationDto;
 
     const qb = this.vehiculoRepository
       .createQueryBuilder('v')
       .leftJoinAndSelect('v.area', 'area')
       .leftJoinAndSelect('v.images', 'images');
 
+    if (areaId) {
+      qb.andWhere('area.id = :areaId', { areaId });
+    }
+
     if (term) {
-      qb.where(
+      qb.andWhere(
         `UPPER(v.vehiculo)     LIKE :t
           OR UPPER(v.marca)       LIKE :t
           OR UPPER(v.num_placa)   LIKE :t
@@ -138,7 +144,11 @@ export class VehiculosService {
 
   // ─── Servicios ───────────────────────────────────────────────────────────────
 
-  async createServicio(vehiculoId: string, dto: CreateServicioVehiculoDto) {
+  async createServicio(
+    vehiculoId: string,
+    dto: CreateServicioVehiculoDto,
+    user: User,
+  ) {
     const vehiculo = await this.vehiculoRepository.findOne({
       where: { id: vehiculoId },
     });
@@ -148,7 +158,11 @@ export class VehiculosService {
       );
 
     try {
-      const servicio = this.servicioRepository.create({ ...dto, vehiculo });
+      const servicio = this.servicioRepository.create({
+        ...dto,
+        vehiculo,
+        creado_por_id: user?.id,
+      });
       return await this.servicioRepository.save(servicio);
     } catch (error) {
       this.handleDBException(error);
@@ -215,7 +229,11 @@ export class VehiculosService {
 
   // ─── Gasolina ────────────────────────────────────────────────────────────────
 
-  async createGasolina(vehiculoId: string, dto: CreateGasolinaVehiculoDto) {
+  async createGasolina(
+    vehiculoId: string,
+    dto: CreateGasolinaVehiculoDto,
+    user: User,
+  ) {
     const vehiculo = await this.vehiculoRepository.findOne({
       where: { id: vehiculoId },
     });
@@ -225,7 +243,11 @@ export class VehiculosService {
       );
 
     try {
-      const gasolina = this.gasolinaRepository.create({ ...dto, vehiculo });
+      const gasolina = this.gasolinaRepository.create({
+        ...dto,
+        vehiculo,
+        creado_por_id: user?.id,
+      });
       return await this.gasolinaRepository.save(gasolina);
     } catch (error) {
       this.handleDBException(error);
@@ -293,6 +315,37 @@ export class VehiculosService {
     await this.gasolinaRepository.remove(gasolina);
     return {
       message: `Registro de gasolina con id ${id} eliminado correctamente`,
+    };
+  }
+
+  async findAllGasolinasByArea(areaId: string, paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto;
+
+    const areaExists = await this.areaRepository.findOne({
+      where: { id: areaId },
+    });
+    if (!areaExists)
+      throw new NotFoundException(`Área con id ${areaId} no encontrada`);
+
+    const [data, totalItems] = await this.gasolinaRepository
+      .createQueryBuilder('g')
+      .innerJoinAndSelect('g.vehiculo', 'v')
+      .innerJoin('v.area', 'area')
+      .where('area.id = :areaId', { areaId })
+      .orderBy('g.fecha_carga', 'DESC')
+      .take(limit)
+      .skip(offset)
+      .getManyAndCount();
+
+    return {
+      data,
+      meta: {
+        totalItems,
+        limit,
+        offset,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: Math.floor(offset / limit) + 1,
+      },
     };
   }
 
